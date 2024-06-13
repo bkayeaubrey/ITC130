@@ -3,12 +3,29 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from scipy import stats
 
-# Function to load data from a CSV file
-@st.cache_data
+# Function to load data from a CSV file and handle missing values
+@st.cache
 def load_data(file_path):
     df = pd.read_csv(file_path)
+    if df.isnull().sum().sum() > 0:
+        st.warning('The dataset contains missing values.')
+        st.dataframe(df[df.isnull().any(axis=1)])
     return df
+
+# Function to detect outliers using z-score
+@st.cache
+def detect_outliers(df, columns):
+    outlier_indices = []
+    for col in columns:
+        # Calculate z-score for each column
+        z_scores = np.abs(stats.zscore(df[col]))
+        # Define threshold for outliers (e.g., z-score > 3)
+        threshold = 3
+        # Find indices of outliers
+        outlier_indices.extend(np.where(z_scores > threshold)[0])
+    return list(set(outlier_indices))
 
 # Load data
 file_path = 'obesity.csv'
@@ -105,4 +122,15 @@ It achieved the highest accuracy, precision, and F1 score, along with the lowest
 The study suggests that Random Forest may be the most suitable choice for this predictive task.
 """)
 
-# Instructions to run the app are in the terminal and the script does not need a main function
+# Outlier Detection Section
+numerical_columns = data.select_dtypes(include=np.number).columns
+outliers = detect_outliers(data, numerical_columns)
+
+# Display outliers
+st.subheader('Outlier Detection')
+if len(outliers) > 0:
+    st.write('Below are the outliers identified in the dataset:')
+    st.write(data.iloc[outliers])
+else:
+    st.write('No outliers detected in the dataset.')
+
