@@ -40,10 +40,28 @@ This app showcases insights from the study "Prediction of Obesity Levels Based O
 which compares the performance of Decision Tree, Random Forest, and SVM algorithms.
 """)
 
-# Display the raw data as a table
-st.subheader('Obesity Data Table')
-st.write('Below is the raw data from the Obesity Levels dataset:')
-st.dataframe(data)
+# Check if there are missing values
+missing_values = data.isnull().sum().sum() > 0
+
+# Display missing values information
+if missing_values:
+    st.warning('The dataset contains missing values.')
+    st.write('Below are the rows with missing values:')
+    st.dataframe(data[data.isnull().any(axis=1)])
+else:
+    st.success('No missing values found in the dataset.')
+
+# Outlier Detection Section
+numerical_columns = data.select_dtypes(include=np.number).columns
+outliers = detect_outliers(data, numerical_columns)
+
+# Display outliers
+st.subheader('Outlier Detection')
+if len(outliers) > 0:
+    st.write('Below are the outliers identified in the dataset:')
+    st.write(data.iloc[outliers])
+else:
+    st.write('No outliers detected in the dataset.')
 
 # Display a summary of the data
 st.subheader('Data Summary')
@@ -121,16 +139,4 @@ The Random Forest algorithm outperformed both the Decision Tree and SVM models i
 It achieved the highest accuracy, precision, and F1 score, along with the lowest MSE and MAE. 
 The study suggests that Random Forest may be the most suitable choice for this predictive task.
 """)
-
-# Outlier Detection Section
-numerical_columns = data.select_dtypes(include=np.number).columns
-outliers = detect_outliers(data, numerical_columns)
-
-# Display outliers
-st.subheader('Outlier Detection')
-if len(outliers) > 0:
-    st.write('Below are the outliers identified in the dataset:')
-    st.write(data.iloc[outliers])
-else:
-    st.write('No outliers detected in the dataset.')
 
