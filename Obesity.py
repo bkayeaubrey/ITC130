@@ -11,7 +11,7 @@ def load_data(file_path):
     return df
 
 # Load data
-file_path = 'C:/Users/WiNDows/Downloads/obesity.csv'
+file_path = 'obesity.csv'
 data = load_data(file_path)
 
 # Title of the web app
